@@ -1,6 +1,6 @@
 package Agents;
-
-import java.util.ArrayList;
+import java.util.*;
+import java.io.*;
 
 public class MFN {
     private int m;
@@ -10,7 +10,7 @@ public class MFN {
     private double[] R;
     private double[] rho;
     private double[] beta;
-    private ArrayList<int[]> MPs;
+    private ArrayList<int[]> MPs = new ArrayList<>();
 
     public MFN(Builder builder) {
         this.m = builder.m;
@@ -38,7 +38,7 @@ public class MFN {
         this.L = builder.L;
         this.R = builder.R;
         this.rho = builder.rho;
-        this.MPs = builder.MPs;
+        this.MPs = (builder.MPs != null) ? builder.MPs : new ArrayList<>();
     }
 
     public static class Combinatorial{
@@ -123,6 +123,48 @@ public class MFN {
         }
         return minTime;
     }
+
+// void getMPs(String fileName) that reads the file with the file name = filename and creates ArrayList<int[]> MPs
+    public void getMPs(String filename) {
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] tokens = line.trim().split(",");
+                int[] nums = Arrays.stream(tokens)
+                        .mapToInt(Integer::parseInt)
+                        .toArray();
+                MPs.add(nums);
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + e.getMessage());
+        }
+    }
+// just for testing
+    public void printMPs() {
+        for (int[] row : MPs) {
+            System.out.println(Arrays.toString(row));
+        }
+    }
+
+// double[][] CDF(double[][] arPMF) that creates an array of values of the cumulative distribution function based on an array arPMF created by formula (1)
+
+
+
+
+//  static double normalCDF(double z) that computes an approximated value of the cumulative distribution function of the standard normal distribution for n=100,
+// based on the formula (https://en.wikipedia.org/wiki/Normal_distribution) ... *formula* where !! denotes the double factorial and should also be implemented
+
+//  static double normalICDF(double u) that computes an approximated value of the quantile function (the inverse of the cumulative distribution function) of the
+// standard normal distribution
+// IMPORTANT! In order to implement normalICDF, invent your own algorithm that for given value u, it determines a real number x such that
+// |𝑛𝑜𝑟𝑚𝑎𝑙𝐶𝐷𝐹(𝑥) − 𝑢| ≤ 10ି ଵ଴
+
+// Based on formula (12b) (from [2] G.S. Fishman – “Monte Carlo, Concepts, Algorithms, and Applications” – Springer), implement a function finding the worst-
+// case normal sample size
+
+// Based on the inverse CDF method applied to discrete distribution or the Chen and Asau Guide Table Method coming from [3] J. E. Gentle – “Random Number
+// Generation and Monte Carlo Methods” – Springer (2005), implement method double[][] randomSSV(int N, double[][]arCDF), that, for a given integer N and an
+// array arCDF of values of the cumulative distribution function, generates N random system state vectors (SSVs).
 
     public static class Builder{
         private int m;
