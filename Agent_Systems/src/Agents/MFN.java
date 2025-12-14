@@ -58,6 +58,15 @@ public class MFN {
                 throw new IllegalArgumentException("Inwalid Newton symbol values.");
             }
         }
+
+        // double factorial
+        public static int doubleFactorial (int n){
+            int result = 1;
+            for (int i = n; i >= 1; i-=2) {
+                result *= i;
+            }
+            return result;
+        }
     }
 
 
@@ -139,7 +148,8 @@ public class MFN {
             System.err.println("Error reading file: " + e.getMessage());
         }
     }
-// just for testing
+
+    // and a method just for testing:
     public void printMPs() {
         for (int[] row : MPs) {
             System.out.println(Arrays.toString(row));
@@ -148,23 +158,107 @@ public class MFN {
 
 // double[][] CDF(double[][] arPMF) that creates an array of values of the cumulative distribution function based on an array arPMF created by formula (1)
 
+    // since double[][] CDF(double[][] arPMF) is supposed to take args I don't know if arPMF is supposed to be a field within the class
+    // if yes - when should it be initialized and filled?
+    // here is a solution that somehow fixes this problem I guess:
+    public double[][] arPMFLoop() {
+        double[][] arPMF = new double[m][];
+        for (int i = 0; i < m; i++) {
+            arPMF[i] = new double[W[i] + 1];
+            for (int k = 0; k <= W[i]; k++) {
+                arPMF[i][k] = probabilityOfStateKCi_Formula1(k, i);
+            }
+        }
+        return arPMF;
+    }
 
+    // and here is the CDF method:
+    public double[][] CDF(double[][] arPMF) {
+        int m = arPMF.length;
+        double[][] arCDF = new double[m][];
+        for (int i = 0; i < m; i++) {
+            int states = arPMF[i].length;
+            arCDF[i] = new double[states];
+            double cumulative = 0.0;
+            for (int k = 0; k < states; k++) {
+                cumulative += arPMF[i][k];
+                arCDF[i][k] = cumulative;
+            }
+        }
+        return arCDF;
+    }
+// static double normalCDF(double z) that computes an approximated value of the cumulative distribution function of the standard normal distribution for n=100,
+// based on the formula below, where !! denotes the double factorial and should also be implemented
 
+    // double factorial is implemented in the combinatorial class
 
-//  static double normalCDF(double z) that computes an approximated value of the cumulative distribution function of the standard normal distribution for n=100,
-// based on the formula (https://en.wikipedia.org/wiki/Normal_distribution) ... *formula* where !! denotes the double factorial and should also be implemented
+    // formula: phi(x) = 0.5 + 1/(sqrt(2*pi)) * e^(- x^2 / 2) * [ x + x^3/3 + x^5/(3*5) + ... + x^(2n+1)/((2n+1)!!) + ... ]
+    public static double normalCDF(double z) {
+        int iMax = 30; // when to stop the infinite loop, can be changed e.g. for more accuracy
+        double ans = 0.5;
+        double multip = (1 / Math.sqrt(2 * Math.PI));
+        multip *= Math.exp(- Math.pow(z, 2) / 2);
 
-//  static double normalICDF(double u) that computes an approximated value of the quantile function (the inverse of the cumulative distribution function) of the
+        double sum = 0.0;
+        for (int i = 1; i < iMax; i+=2) {
+            sum += Math.pow(z, i) / Combinatorial.doubleFactorial(i);
+        }
+
+        multip *= sum;
+        ans += multip;
+        return ans;
+    }
+
+// static double normalICDF(double u) that computes an approximated value of the quantile function (the inverse of the cumulative distribution function) of the
 // standard normal distribution
 // IMPORTANT! In order to implement normalICDF, invent your own algorithm that for given value u, it determines a real number x such that
 // |𝑛𝑜𝑟𝑚𝑎𝑙𝐶𝐷𝐹(𝑥) − 𝑢| ≤ 10ି ଵ଴
 
-// Based on formula (12b) (from [2] G.S. Fishman – “Monte Carlo, Concepts, Algorithms, and Applications” – Springer), implement a function finding the worst-
-// case normal sample size
+    // TO BE IMPLEMENTED
 
-// Based on the inverse CDF method applied to discrete distribution or the Chen and Asau Guide Table Method coming from [3] J. E. Gentle – “Random Number
+
+
+
+
+
+// Based on formula (12b from [2]), implement a function finding the worst-case normal sample size
+    private double integrandPhi(double y){
+        return Math.exp(- Math.pow(y,2) / 2);
+    }
+    private double integralPhi(double z, double minusInfinity){
+        double ans = 0.0;
+        double step = 0.001;
+        for(double x = minusInfinity; x < z; x+=step){
+            ans += integrandPhi(x) / Math.sqrt(2*Math.PI) * step;
+        }
+        return ans;
+    }
+    private double phi(double th){
+        double minusInfinity = -10.0;
+        double z = minusInfinity;
+        double step = 0.001;
+        while(integralPhi(z, minusInfinity)<th){
+            z+= step;
+        }
+        return z;
+    }
+    public double worstCaseNSS(double eps, double delta) {
+        double phiVal = phi(1 - delta / 2);
+        double nN = Math.ceil(Math.pow(phiVal, 2) / Math.pow(2 * eps, 2));
+        return nN;
+    }
+
+// Based on the inverse CDF method applied to discrete distribution or the Chen and Asau Guide Table Method coming from [3] J. E. Gentle – “Random Number
 // Generation and Monte Carlo Methods” – Springer (2005), implement method double[][] randomSSV(int N, double[][]arCDF), that, for a given integer N and an
 // array arCDF of values of the cumulative distribution function, generates N random system state vectors (SSVs).
+
+    // TO BE IMPLEMENTED
+
+
+
+
+
+
 
     public static class Builder{
         private int m;
