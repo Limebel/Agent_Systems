@@ -214,10 +214,28 @@ public class MFN {
 // IMPORTANT! In order to implement normalICDF, invent your own algorithm that for given value u, it determines a real number x such that
 // |𝑛𝑜𝑟𝑚𝑎𝑙𝐶𝐷𝐹(𝑥) − 𝑢| ≤ 10ି ଵ଴
 
-    // TO BE IMPLEMENTED
+    static double normaICDF(double u){
+        if (u <= 0.0 || u >= 1.0) {
+            throw new IllegalArgumentException("u must be in (0,1)");
+        }
 
+        double tol = 1e-6;       //precision
+        double low = -6.0;
+        double high = 6.0;
+        double mid = 0.0;
 
+        while ((high - low) > tol) {
+            mid = (low + high) / 2.0;
+            double cdf = normalCDF(mid);
+            if (cdf < u) {
+                low = mid;
+            } else {
+                high = mid;
+            }
+        }
 
+        return mid;
+    }
 
 
 
@@ -252,12 +270,27 @@ public class MFN {
 // Generation and Monte Carlo Methods” – Springer (2005), implement method double[][] randomSSV(int N, double[][]arCDF), that, for a given integer N and an
 // array arCDF of values of the cumulative distribution function, generates N random system state vectors (SSVs).
 
-    // TO BE IMPLEMENTED
+    public double[][] randomSSV(int N, double[][] arCDF) {
+        int m = arCDF.length;
+        double[][] SSV = new double[N][m];
+        Random rand = new Random();
 
-
-
-
-
+        for (int n = 0; n < N; n++) {
+            for (int j = 0; j < m; j++) {
+                double u = rand.nextDouble();
+                int state = 0;
+                // find first index k such that CDF >= u
+                for (int k = 0; k < arCDF[j].length; k++) {
+                    if (arCDF[j][k] >= u) {
+                        state = k;
+                        break;
+                    }
+                }
+                SSV[n][j] = state;
+            }
+        }
+        return SSV;
+    }
 
 
     public static class Builder{

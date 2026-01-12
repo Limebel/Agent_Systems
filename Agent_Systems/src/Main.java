@@ -20,6 +20,7 @@ public class Main {
         test.getMPs("MPs0.csv");
         test.printMPs();
     // cdf
+        System.out.println("CDF:");
         double[][] cdf = test.CDF(test.arPMFLoop());
         for (double[] row : cdf) {
             for (double value : row) {
@@ -29,6 +30,7 @@ public class Main {
         }
         System.out.println();
     // normalCDF
+        System.out.println("normalCDF:");
         System.out.println(test.normalCDF(1.0));
     // worstCaseNSS
         System.out.println(test.worstCaseNSS(0.01,0.05)); // 9604
