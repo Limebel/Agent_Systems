@@ -73,10 +73,10 @@ public class MFN {
     private double probabilityOfStateKCi_Formula1 (int k, int i){
         if (i < 0 || i >= m) throw new IllegalArgumentException("Invalid link index");
         if (k < 0 || k > W[i]) throw new IllegalArgumentException("Invalid capacity state");
-        if(k > 1){
+        if(k >= 1){
             return 1/beta[i]*Combinatorial.newtonSymbol(W[i],k)*
-                    Math.pow(rho[i]*beta[i], k)*
-                    Math.pow(1 - rho[i]*beta[i], W[i]-k);
+                    Math.pow(R[i]*beta[i], k)*
+                    Math.pow(1 - R[i]*beta[i], W[i]-k);
         }
         else{
             return 1-1/beta[i]*
@@ -169,6 +169,13 @@ public class MFN {
                 arPMF[i][k] = probabilityOfStateKCi_Formula1(k, i);
             }
         }
+        for (int i = 0; i < m; i++) {
+            double sum = 0.0;
+            for (int k = 0; k < arPMF[i].length; k++) {
+                sum += arPMF[i][k];
+            }
+            System.out.println("PMF sum for component " + i + " = " + sum);
+        }
         return arPMF;
     }
 
@@ -240,10 +247,10 @@ public class MFN {
 
 
 // Based on formula (12b from [2]), implement a function finding the worst-case normal sample size
-    private double integrandPhi(double y){
+    public static double integrandPhi(double y){
         return Math.exp(- Math.pow(y,2) / 2);
     }
-    private double integralPhi(double z, double minusInfinity){
+    public static double integralPhi(double z, double minusInfinity){
         double ans = 0.0;
         double step = 0.001;
         for(double x = minusInfinity; x < z; x+=step){
@@ -251,7 +258,7 @@ public class MFN {
         }
         return ans;
     }
-    private double phi(double th){
+    public static double phi(double th){
         double minusInfinity = -10.0;
         double z = minusInfinity;
         double step = 0.001;
@@ -260,9 +267,9 @@ public class MFN {
         }
         return z;
     }
-    public double worstCaseNSS(double eps, double delta) {
+    public static int worstCaseNSS(double eps, double delta) {
         double phiVal = phi(1 - delta / 2);
-        double nN = Math.ceil(Math.pow(phiVal, 2) / Math.pow(2 * eps, 2));
+        int nN = (int)Math.ceil(Math.pow(phiVal, 2) / Math.pow(2 * eps, 2));
         return nN;
     }
 
@@ -280,8 +287,7 @@ public class MFN {
                 double u = rand.nextDouble();
                 int state = 0;
                 // find first index k such that CDF >= u
-                for (int k = 0; k < arCDF[j].length; k++) {
-                    if (arCDF[j][k] >= u) {
+                for (int k = 0; k < arCDF[j].length; k++) {if (arCDF[j][k] >= u) {
                         state = k;
                         break;
                     }

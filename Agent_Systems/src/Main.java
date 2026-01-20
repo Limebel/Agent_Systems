@@ -16,7 +16,8 @@ public class Main {
             .R(c)
             .rho(c)
             .build();
-    // reading file
+    // reading
+        System.out.println("MPS:");
         test.getMPs("MPs0.csv");
         test.printMPs();
     // cdf
@@ -33,11 +34,18 @@ public class Main {
         System.out.println("normalCDF:");
         System.out.println(test.normalCDF(1.0));
     // worstCaseNSS
+        System.out.println("WorstcaseNSS:");
         System.out.println(test.worstCaseNSS(0.01,0.05)); // 9604
         System.out.println(test.worstCaseNSS(0.05,0.05)); // 384
         System.out.println(test.worstCaseNSS(0.01,0.01)); // 16576
         System.out.println(test.worstCaseNSS(0.02,0.10)); // 1692
         System.out.println(test.worstCaseNSS(0.05,0.01)); // 664
+        // SSVs
+        double[][] ssv = test.randomSSV(10, cdf);
+        System.out.println("Random SSVs:");
+        for (double[] row : ssv) {
+            System.out.println(Arrays.toString(row));
+        }
 
 
 
