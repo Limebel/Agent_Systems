@@ -31,7 +31,7 @@ public class SSVGeneratorGui extends JFrame {
 
         setLayout(new GridLayout(7, 2, 5, 5));
 
-        // Default values (example network)
+        // Default values
         wField   = new JTextField("4,3,2,3,2");
         cField   = new JTextField("10,15,25,15,20");
         lField   = new JTextField("5,7,6,5,8");

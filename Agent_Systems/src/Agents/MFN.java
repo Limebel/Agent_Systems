@@ -174,7 +174,7 @@ public class MFN {
             for (int k = 0; k < arPMF[i].length; k++) {
                 sum += arPMF[i][k];
             }
-            System.out.println("PMF sum for component " + i + " = " + sum);
+            //System.out.println("PMF sum for component " + i + " = " + sum);
         }
         return arPMF;
     }
