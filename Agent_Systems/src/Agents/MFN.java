@@ -90,7 +90,7 @@ public class MFN {
             return leadTimeOfP_Formula4(P) + Math.ceil(d / capacityOfP);
         }
         else{
-            throw new IllegalArgumentException("Infinity value (Formula 3).");
+            return Double.POSITIVE_INFINITY;
         }
     }
 
@@ -110,25 +110,25 @@ public class MFN {
         return min;
     }
 
-    private double transmissionCostOfP_Formula6 (int[] P){
+/*    private double transmissionCostOfP_Formula6 (int[] P){
         double totalcost = 0;
         for (int edge : P) {
             totalcost += beta[edge];
         }
         return totalcost;
-    }
+    }*/
 
-    private double transmissionTimeUnderX_Formula8 (double d, double[] X, double b){
+    public double transmissionTimeUnderX_Formula8 (double d, double[] X){
         double minTime = Double.POSITIVE_INFINITY;
 
         for(int[] P : MPs){
-            double pathCost = transmissionCostOfP_Formula6(P);
-            if (pathCost<=b){
+            //double pathCost = transmissionCostOfP_Formula6(P);
+            //if (pathCost<=b){
                 double time = transmissionTimeOfd_Formula3(P, d, X);
                 if(time<minTime){
                     minTime = time;
                 }
-            }
+            //}
         }
         return minTime;
     }
@@ -140,7 +140,7 @@ public class MFN {
             while ((line = br.readLine()) != null) {
                 String[] tokens = line.trim().split(",");
                 int[] nums = Arrays.stream(tokens)
-                        .mapToInt(Integer::parseInt)
+                        .mapToInt(s->Integer.parseInt(s.trim())-1)
                         .toArray();
                 MPs.add(nums);
             }

@@ -1,6 +1,13 @@
 package Agents;
+import jade.core.AID;
 import jade.core.Agent;
+import jade.domain.DFService;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPAException;
+import jade.lang.acl.ACLMessage;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 public class SSVGenerator extends Agent {
@@ -65,6 +72,48 @@ public class SSVGenerator extends Agent {
 
         for (int i = 0; i < 5; i++) {
             System.out.println(Arrays.toString(SSVs[i]));
+        }
+
+        AID ttAgent = findTTAgent();
+        if (ttAgent == null) {
+            System.out.println("TT agent not found!");
+            doDelete();
+            return;
+        }
+        sendDataToTT(ttAgent, W, C, L, R, rho, SSVs, mpFile);
+    }
+
+    private AID findTTAgent() {
+        DFAgentDescription template = new DFAgentDescription();
+        ServiceDescription sd = new ServiceDescription();
+        sd.setType("transmission-time");
+        template.addServices(sd);
+
+        try {
+            DFAgentDescription[] result =
+                    DFService.search(this, template);
+
+            if (result.length > 0) {
+                return result[0].getName();
+            }
+        } catch (FIPAException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private void sendDataToTT(AID ttAgent, int[] W, double[] C, int[] L, double[] R, double[]rho, double[][] SSVs, String mpFilePath) {
+        try {
+            ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+            msg.addReceiver(ttAgent);
+            msg.setContentObject(new Object[] {W, C, L, R, rho, SSVs, mpFilePath});
+            send(msg);
+
+            System.out.println("Data sent to TT agent");
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
