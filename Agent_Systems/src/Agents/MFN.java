@@ -275,7 +275,8 @@ public class MFN {
     }
 
     // Generating random N number of random SSVs. SSV is System State Vector, so just a random state of a network.
-    // e.x. SSV=0,1,2. First link has state 0 etc.
+    // (But multiplied by maximum capacity of link (C)
+    // e.x. SSV=10,30,20. First link has maximum capacity 10 etc.
     public double[][] randomSSV(int N, double[][] arCDF) {
         int m = arCDF.length;
         double[][] SSV = new double[N][m];
