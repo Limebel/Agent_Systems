@@ -1,5 +1,6 @@
 package Agents;
 
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
@@ -13,15 +14,16 @@ import java.io.PrintWriter;
 
 public class TT extends Agent {
     private double d;   // demanded flow
-    private double T;   // max transmission time
+    private double T;   // max transmission time we want
 
     @Override
     protected void setup() {
-        readArguments();
-        registerService();
-        waitForSSVMessage();
+        readArguments(); //Initialization method
+        registerService(); //Registering service
+        waitForSSVMessage(); //Waiting to be chosen for the task
     }
 
+    //Initialization method, just loading and  checking arguments correctness
     private void readArguments() {
         Object[] args = getArguments();
 
@@ -40,12 +42,13 @@ public class TT extends Agent {
         }
     }
 
+    //Informing on some kind of service registering page(dfd) that I want to do specific service
     private void registerService() {
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
 
         ServiceDescription sd = new ServiceDescription();
-        sd.setType("transmission-time");
+        sd.setType("transmission-time"); //Type of service
         sd.setName("TT-agent");
 
         dfd.addServices(sd);
@@ -57,6 +60,7 @@ public class TT extends Agent {
         }
     }
 
+    //Waiting until receiving information with task
     private void waitForSSVMessage() {
         addBehaviour(new CyclicBehaviour() {
             @Override
@@ -72,8 +76,10 @@ public class TT extends Agent {
         });
     }
 
+    //Doing the task
     private void handleMessage(ACLMessage msg) {
         try {
+            //Unpacking message
             Object[] data = (Object[]) msg.getContentObject();
 
             int[] W = (int[]) data[0];
@@ -86,25 +92,26 @@ public class TT extends Agent {
 
             System.out.println("Received SSV data from SSVGenerator");
 
-            writeSSVsToCSV(SSVs);
-            double reliability = computeReliability(W, C, L, R, rho, SSVs, mpFilePath);
+            writeSSVsToCSV(SSVs); //Writing SSVs to csv file (no needed for the task, required by instruction)
+            double reliability = computeReliability(W, C, L, R, rho, SSVs, mpFilePath); //Calculating reliability
 
-            //sendResult(msg.getSender(), reliability);
+            sendResult(msg.getSender(), reliability); //Sending results back
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        doDelete();
+        doDelete(); //Deletion after oing the task
     }
 
+    //Writing SSVs into csv file
     private void writeSSVsToCSV(double[][] SSVs){
         File csvOutputFile = new File("SSV.csv");
         try(PrintWriter pw = new PrintWriter(csvOutputFile)){
             for(double[] ssv : SSVs){
-                for(double state : ssv){
-                    pw.print((int)state);
-                    pw.print(",");
+                for (int i = 0; i < ssv.length; i++) {
+                    pw.print((int) ssv[i]);
+                    if (i < ssv.length - 1) pw.print(",");
                 }
                 pw.println();
             }
@@ -113,7 +120,9 @@ public class TT extends Agent {
         }
     }
 
+    //Computing reliability (main task)
     private double computeReliability(int[] W, double[] C, int[] L, double[] R, double[]rho, double[][] SSVs, String mpFilePath){
+        //Creating mfn object based on information
         MFN mfn = MFN.builder()
                 .m(W.length)
                 .W(W)
@@ -127,11 +136,21 @@ public class TT extends Agent {
 
         int success = 0;
 
+        //Reliability is a probability that we can send amount of flow (d) through system (mfn) in shorter time than (T)
+        //We calculate it by just testing many different states of a system (SSVs)
         for(double[] X : SSVs){
-            if(mfn.transmissionTimeUnderX_Formula8(d, X) < T){
+            if(mfn.transmissionTimeUnderX_Formula8(d, X) <= T){
                 success++;
             }
         }
         return (double) success/SSVs.length;
+    }
+
+    //Sending the results to SSVGenerator agent
+    private void sendResult(AID receiver, double reliability) {
+        ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
+        reply.addReceiver(receiver);
+        reply.setContent("Estimated reliability = " + reliability);
+        send(reply);
     }
 }
